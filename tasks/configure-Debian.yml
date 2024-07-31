@@ -41,7 +41,16 @@
   notify: restart apache
   when: apache_create_vhosts | bool
 
-- name: Add vhost symlink in sites-enabled.
+- name: Ensure vhosts.conf exists in sites-available
+  ansible.builtin.template:
+    src: templates/vhosts.conf.j2
+    dest: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: apache_create_vhosts | bool
+
+- name: Add vhost symlink in sites-enabled
   file:
     src: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
     dest: "{{ apache_conf_path }}/sites-enabled/{{ apache_vhosts_filename }}"
@@ -56,4 +65,4 @@
     path: "{{ apache_conf_path }}/sites-enabled/{{ apache_default_vhost_filename }}"
     state: absent
   notify: restart apache
-  when: apache_remove_default_vhost
+  when: apache_remove_default_vhost | bool
